@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizador de Mapas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Visualizador de Mapas Web</h1>
+        <div style="margin-bottom: 20px;"></div>
+        <form id="filtros" class="filtros" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- 🆕 SECCIÓN DE BÚSQUEDA AVANZADA: Nombre/RFC + Dirección Cercana -->
+            <div class="advanced-search-section">
+                <div class="search-container">
+                    <!-- Búsqueda por Nombre/RFC -->
+                    <div class="search-group">
+                        <label class="search-label">🔍 Buscar por Nombre/RFC:</label>
+                        <input type="text" id="busqueda" name="busqueda" placeholder="Ej: García López Juan" autocomplete="off" class="search-input">
+                    </div>
+
+                    <!-- Búsqueda por Dirección Cercana -->
+                    <div class="search-group">
+                        <label class="search-label">🏠 Buscar por Dirección Cercana:</label>
+                        <div class="address-search-container">
+                            <input type="text" id="address-search" placeholder="Ej: Centro, Ecatepec" autocomplete="off" class="address-input">
+                            <select id="radius-search" class="radius-select">
+                                <option value="1">1 km</option>
+                                <option value="2">2 km</option>
+                                <option value="3" selected>3 km</option>
+                                <option value="5">5 km</option>
+                                <option value="10">10 km</option>
+                            </select>
+                            <button type="button" id="search-nearby-btn" class="search-nearby-button" onclick="searchNearbyAddresses()">
+                                🔍 Buscar Cercanos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de selecciones activas (chips/tags) -->
+            <div class="active-selections" id="activeSelections" style="display: none;">
+                <div class="selection-header">
+                    🎯 Filtros Activos:
+                    <button type="button" class="clear-all-btn" onclick="clearAllChips()" title="Limpiar todos los filtros">
+                        🗑️ Limpiar Todo
+                    </button>
+                </div>
+                <div class="chips-container" id="chipsContainer">
+                    <!-- Los chips se agregarán dinámicamente aquí -->
+                </div>
+            </div>
+
+            <!-- Contenedor principal de filtros con botón a la derecha -->
+            <div class="filters-container-horizontal">
+                <!-- Filtros a la izquierda -->
+                <div class="filters-left-section">
+                    <!-- Área espacial - Panel izquierdo compacto -->
+                    <div class="filter-section spatial-section">
+                        <div class="section-header spatial-header">📍 Ubicación</div>
+                        <div class="horizontal-filters">
+                            <div class="filter-item">
+                                <div class="dropdown-container">
+                                    <button type="button" class="dropdown-button spatial-button" data-filter="municipio">
+                                        <span class="dropdown-text">🏛️ Municipio</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </button>
+                                    <div class="dropdown-menu" id="municipio-dropdown">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Buscar municipios..." class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options" id="municipio-options">
+                                            <!-- Opciones se cargarán dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <div class="dropdown-container">
+                                    <button type="button" class="dropdown-button spatial-button" data-filter="cp">
+                                        <span class="dropdown-text">📮 Código Postal</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </button>
+                                    <div class="dropdown-menu" id="cp-dropdown">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Buscar códigos postales..." class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options" id="cp-options">
+                                            <!-- Opciones se cargarán dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área de datos y tiempo - Panel derecho compacto -->
+                    <div class="filter-section data-section">
+                        <div class="section-header data-header">📊 Datos</div>
+                        <div class="horizontal-filters">
+                            <div class="filter-item">
+                                <div class="dropdown-container">
+                                    <button type="button" class="dropdown-button" data-filter="idperiodo">
+                                        <span class="dropdown-text">📅 Período</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </button>
+                                    <div class="dropdown-menu" id="idperiodo-dropdown">
+                                        <div class="dropdown-options" id="idperiodo-options">
+                                            <!-- Opciones se cargarán dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <div class="dropdown-container">
+                                    <button type="button" class="dropdown-button" data-filter="idejercicio">
+                                        <span class="dropdown-text">📆 Año</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </button>
+                                    <div class="dropdown-menu" id="idejercicio-dropdown">
+                                        <div class="dropdown-options" id="idejercicio-options">
+                                            <!-- Opciones se cargarán dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <div class="dropdown-container">
+                                    <button type="button" class="dropdown-button" data-filter="tipo">
+                                        <span class="dropdown-text">🏷️ Tipo</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </button>
+                                    <div class="dropdown-menu" id="tipo-dropdown">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Buscar tipos..." class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options" id="tipo-options">
+                                            <!-- Opciones se cargarán dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón completamente a la derecha -->
+                <div class="search-button-right">
+                    <button type="submit" class="search-button">
+                        <span class="button-icon">🔍</span>
+                        Buscar Datos
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div id="map" style="margin-top: 24px;"></div>
+        <div id="resultados" class="resultados"></div>
+        <div id="loading" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">Cargando...</div>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/filtros.js"></script>
+</body>
+</html>
