@@ -2,7 +2,7 @@
 
 ## 📋 Funcionalidad Implementada
 
-Se ha integrado exitosamente la geocodificación automática usando el servidor Nominatim local en `http://10.65.117.238/`. Esta funcionalidad permite convertir direcciones de la base de datos en coordenadas geográficas precisas y mostrarlas en el mapa.
+Se ha integrado exitosamente la geocodificación automática usando el servidor Nominatim local. Esta funcionalidad permite convertir direcciones de la base de datos en coordenadas geográficas precisas y mostrarlas en el mapa.
 
 ## 🆕 **NUEVAS FUNCIONALIDADES: GEOCODIFICACIÓN AVANZADA**
 
@@ -160,9 +160,9 @@ Cuenta registros en ese CP: 15 registros
 
 ### **Servidor Nominatim Local:**
 ```bash
-# El servidor debe estar corriendo en (se prueban múltiples opciones):
-http://10.65.117.238:8080/    # Puerto 8080 (recomendado)
-http://10.65.117.238/         # Puerto por defecto
+# El servidor debe estar corriendo:
+# Puerto 8080 (recomendado)
+# Puerto por defecto
 
 # Comando típico para iniciar Nominatim:
 nominatim serve --port 8080
@@ -178,8 +178,8 @@ nominatim serve --port 8080
 
 ### **Múltiples Servidores (Failover):**
 La aplicación prueba automáticamente múltiples configuraciones:
-1. `http://10.65.117.238:8080/` (principal)
-2. `http://10.65.117.238/` (alternativo)
+1. `http://localhost:8080/` (principal)
+2. `http://localhost/` (alternativo)
 3. `http://localhost:8080/` (fallback local)
 
 ### **Parámetros de la API:**
